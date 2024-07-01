@@ -3,7 +3,13 @@
 /* eslint-disable @stylistic/js/quotes */
 const mongoose = require('mongoose');
 
-const url = `mongodb+srv://sergiomapa046:OFg4tVGidtVsPJIq@clusterperson.ld3ek5b.mongodb.net/blog?retryWrites=true&w=majority&appName=ClusterPerson`;
+// Obtiene la URL de conexión de los argumentos de línea de comandos
+const url = process.argv[2];
+
+if (!url) {
+    console.error('Missing MongoDB connection URL');
+    process.exit(1);
+}
 
 mongoose.set('strictQuery', false);
 mongoose.connect(url).then(() => {
@@ -16,7 +22,7 @@ mongoose.connect(url).then(() => {
 
     const Blog = mongoose.model('Blog', blogSchema);
 
-    if (process.argv.length === 2) {
+    if (process.argv.length === 3) {
         // No hay argumentos adicionales, listamos los blogs existentes
         Blog.find({}).then(result => {
             result.forEach(blog => {
@@ -24,12 +30,12 @@ mongoose.connect(url).then(() => {
             });
             mongoose.connection.close();
         });
-    } else if (process.argv.length >= 5) {
+    } else if (process.argv.length >= 6) {
         // Hay suficientes argumentos para crear un nuevo blog
-        const title = process.argv[2];
-        const author = process.argv[3];
-        const url = process.argv[4];
-        const likes = process.argv[5] ? parseInt(process.argv[5]) : 0;
+        const title = process.argv[3];
+        const author = process.argv[4];
+        const url = process.argv[5];
+        const likes = process.argv[6] ? parseInt(process.argv[6]) : 0;
 
         const blog = new Blog({
             title,
@@ -43,7 +49,7 @@ mongoose.connect(url).then(() => {
             mongoose.connection.close();
         });
     } else {
-        console.log('Usage: node mongo.js [title] [author] [url] [likes]');
+        console.log('Usage: node mongo.js [mongoDB URL] [title] [author] [url] [likes]');
         mongoose.connection.close();
     }
 }).catch((error) => {
